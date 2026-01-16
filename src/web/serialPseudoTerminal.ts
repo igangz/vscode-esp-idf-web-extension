@@ -24,7 +24,7 @@ import {
   TerminalDimensions,
   window,
 } from "vscode";
-import { uInt8ArrayToString,stringToUInt8Array, universalReset, sleep } from "./utils";
+import { stringToUInt8Array, universalReset, sleep } from "./utils";
 
 export class SerialTerminal implements Pseudoterminal {
   private writeEmitter = new EventEmitter<string>();
@@ -32,6 +32,7 @@ export class SerialTerminal implements Pseudoterminal {
   private closeEmitter = new EventEmitter<number>();
   public onDidClose: Event<number> = this.closeEmitter.event;
   public closed = false;
+  private textDecoder = new TextDecoder('utf-8');
 
   public constructor(protected transport: Transport) {}
 
@@ -48,7 +49,7 @@ export class SerialTerminal implements Pseudoterminal {
       if (done || !value) {
         break;
       }
-      let valStr = uInt8ArrayToString(value);
+      let valStr = this.textDecoder.decode(value, { stream: true });
       this.writeOutput(valStr);
     }
   }
